@@ -1,0 +1,165 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Simavr by ichpuchtli</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Simavr</h1>
+        <p>simavr is a lean, mean and hackable AVR simulator for linux &amp; OSX</p>
+
+        <p class="view"><a href="https://github.com/ichpuchtli/simavr">View the Project on GitHub <small>ichpuchtli/simavr</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/ichpuchtli/simavr/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/ichpuchtli/simavr/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/ichpuchtli/simavr">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>simavr - a lean and mean Atmel AVR simulator for linux</h1>
+
+<p><em>simavr</em> is a new AVR simulator for linux, or any platform that uses avr-gcc. It uses 
+avr-gcc's own register definition to simplify creating new targets for supported AVR
+devices. The core was made to be small and compact, and hackable so allow quick 
+prototyping of an AVR project. The AVR core is now stable for use with parts 
+with &lt;= 128KB flash, and with preliminary support for the bigger parts. The 
+simulator loads ELF files directly, and there is even a way to specify simulation 
+parameters directly in the emulated code using an .elf section. You can also 
+load multipart HEX files.</p>
+
+<h2>Supported IOs</h2>
+
+<ul>
+<li><em>eeprom</em></li>
+<li><em>watchdog</em></li>
+<li>
+<em>IO ports</em> (including pin interrupts)</li>
+<li>
+<em>Timers</em>, 8 &amp;16 (Normal, CTC and Fast PWM, the overflow interrupt too)</li>
+<li>The <em>UART</em>, including tx &amp; rx interrupts (there is a loopback/local echo test mode too)</li>
+<li>
+<em>SPI</em>, master/slave including the interrupt</li>
+<li>
+<em>i2c</em> Master &amp; Slave</li>
+<li>External <em>Interrupts</em>, INT0 and so on.</li>
+<li><em>ADC</em></li>
+<li>Self-programming (ie bootloaders!)</li>
+</ul><h2>Emulated Cores (very easy to add new ones!)</h2>
+
+<ul>
+<li>AT90USB162 (with USB!)</li>
+<li>ATMega1280</li>
+<li>ATMega128</li>
+<li>ATMega16M1</li>
+<li>ATMega164/324/644</li>
+<li>ATMega48/88/168/328</li>
+<li>ATMega8</li>
+<li>ATTiny25/45/85</li>
+<li>ATTIny44/84</li>
+<li>ATTiny2313</li>
+<li>ATTiny13</li>
+</ul><h2>Extras:</h2>
+
+<ul>
+<li>fully working <em>gdb</em> support including some pretty cool “passive modes”.</li>
+<li>There is also very easy support for “VCD” (Value Change Dump) that can be visualized 
+graphically as “waveforms” with tools like <em>gtkwave</em> (see below).</li>
+<li>There are a few examples of real life firmwares running on simavr, including OpenGL rendering of the display…</li>
+<li>There is support for <em>Arduino</em>, but no IDE integration</li>
+</ul><p><em>Note:</em> a mailing list/google group now exists
+You can also join <em>#simavr</em> on Freenode for a very quiet IRC channel.</p>
+
+<h2>VCD Support -- built in logic analyzer </h2>
+
+<p><em>simavr</em> can output most of its pins, firmware variables, interrupts and a few other
+things as signals to be dumped into a file that can be plotted using gtkwave for
+further, precise analysis.
+A firmware can contain instructions for <em>simavr</em> to know what to trace, and the file is
+automatically generated.
+Example:</p>
+
+<pre><code>const struct avr_mmcu_vcd_trace_t _mytrace[]  _MMCU_ = {
+    { AVR_MCU_VCD_SYMBOL("UDR0"), .what = (void*)&amp;UDR0, },
+    { AVR_MCU_VCD_SYMBOL("UDRE0"), .mask = (1 &lt;&lt; UDRE0), .what = (void*)&amp;UCSR0A, },
+};
+</code></pre>
+
+<p>Will tell <em>simavr</em> to generate a trace everytime the UDR0 register changes and everytime
+the interrupt is raised (in UCSR0A). The <em><em>MMCU</em></em> tag tells gcc that it needs compiling,
+but it won't be linked in your program, so it takes literally zero bytes, this is a code
+section that is private to <em>simavr</em>, it's free!
+A program running with these instructions and writing to the serial port will generate
+a file that will display:</p>
+
+<pre><code>$ ./simavr/run_avr tests/atmega88_example.axf
+AVR_MMCU_TAG_VCD_TRACE 00c6:00 - UDR0
+AVR_MMCU_TAG_VCD_TRACE 00c0:20 - UDRE0
+Loaded 1780 .text
+Loaded 114 .data
+Loaded 4 .eeprom
+Starting atmega88 - flashend 1fff ramend 04ff e2end 01ff
+atmega88 init
+avr_eeprom_ioctl: AVR_IOCTL_EEPROM_SET Loaded 4 at offset 0
+Creating VCD trace file 'gtkwave_trace.vcd'
+Read from eeprom 0xdeadbeef -- should be 0xdeadbeef..
+Read from eeprom 0xcafef00d -- should be 0xcafef00d..
+simavr: sleeping with interrupts off, quitting gracefully
+</code></pre>
+
+<p>And when the file is loaded in gtkwave, you see:
+<img src="https://github.com/buserror-uk/simavr/raw/master/doc/img/gtkwave1.png" alt="gtkwave"></p>
+
+<p>You get a very precise timing breakdown of any change that you add to the trace, down
+to the AVR cycle. </p>
+
+<h2>Example:</h2>
+
+<p><em>simavr</em> is really made to be the center for emulating your own AVR projects, not just
+a debugger, but also the emulating the peripherals you will use in your firmware, so 
+you can test and develop offline, and now and then try it on the hardware.</p>
+
+<p>You can also use <em>simavr</em> to do test units on your shipping firmware to validate it
+before you ship a new version, to prevent regressions or mistakes.</p>
+
+<p><em>simavr</em> has a few 'complete projects/ that demonstrate this, most of them were made
+using real hardware at some point, and the firmware binary is <em>exactly</em> the one that
+ran on the hardware. The key here is to emulate the <em>parts</em> or peripherals that
+are hooked to the AVR. Of course, you don't have to emulate the full hardware, you just
+need to generate the proper stimulus so that the AVR is fooled.</p>
+
+<h2>HD44780 LCD Board Demo</h2>
+
+<p><img src="https://github.com/buserror-uk/simavr/raw/master/doc/img/hd44780.png" alt="lcd"></p>
+
+<p>This example board hooks up an Atmega48 to an emulated HD44780 LCD and display a running
+counter in the 'lcd'. Everything is emulated, the firmware runs exactly like this
+on a real hardware.</p>
+
+<p><img src="https://github.com/buserror-uk/simavr/raw/master/doc/img/hd44780-wave.png" alt="lcd-gtkwave"></p>
+
+<p>And this is a gtkwave trace of what the firmware is doing. You can zoom in, measure, etc
+in gtkwave, select trades to see etc.</p>
+
+<p>Quite a few other examples are available!</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/ichpuchtli">ichpuchtli</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
