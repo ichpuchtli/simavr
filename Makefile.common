@@ -40,6 +40,7 @@ SIMAVR		:= ${shell for p in . .. ../.. ../../..;do test -d $$p/simavr/sim && ech
 ARCH 		= ${shell $(CC) -dumpmachine | sed -e 's/^x/i/' -e 's/\(.\).*/\1/'}
 
 CFLAGS		+= -O2 -Wall
+CFLAGS 		+= -fPIC
 CFLAGS		+= -g
 CORE_CFLAGS	= -nostdinc
 
@@ -58,6 +59,10 @@ else
 AVR_ROOT 	:= /usr/lib/avr
 AVR_INC 	:= ${AVR_ROOT}
 AVR 		:= avr-
+ifeq (${shell uname -n}, archbang)
+AVR_ROOT 	:= /usr/avr
+AVR_INC 	:= ${AVR_ROOT}
+endif
 ifeq (${shell uname -o}, Msys)
 AVR_ROOT    := ${shell echo "${AVR32_HOME}" | tr '\\' '/'}
 AVR_INC     := ${AVR_ROOT}/avr
