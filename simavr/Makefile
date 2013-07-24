@@ -51,10 +51,13 @@ IPATH	+= ../../shared
 ${OBJ}/libsimavr.a	:	${sim_o}
 ifeq ($(V),1)
 	$(AR) cru $@ $^ && $(RANLIB) $@
+	ln -sf ${OBJ}/libsimavr.a
 else
 	@echo AR $@
 	@$(AR) cru $@ $^ && $(RANLIB) $@
+	ln -sf ${OBJ}/libsimavr.a
 endif
+
 
 #
 # Shared library (Linux)
