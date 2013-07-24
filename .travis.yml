@@ -1,6 +1,6 @@
 install:
   - sudo apt-get update -y
-  - sudo apt-get install elfutils libelf-dev freeglut3 freeglut3-dev gcc-avr binutils-avr avr-libc avr-gdb -y
+  - sudo apt-get install elfutils libelf-dev freeglut3 freeglut3-dev gcc-avr binutils-avr avr-libc gdb-avr -y
 
 script:
   - make
